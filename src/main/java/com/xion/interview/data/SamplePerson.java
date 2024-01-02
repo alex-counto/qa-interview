@@ -11,11 +11,10 @@ public class SamplePerson extends AbstractEntity {
     private String lastName;
     @Email
     private String email;
-    private String phone;
     private LocalDate dateOfBirth;
-    private String occupation;
+    private Occupation occupation;
+    private double salary;
     private String role;
-    private boolean important;
 
     public String getFirstName() {
         return firstName;
@@ -35,35 +34,29 @@ public class SamplePerson extends AbstractEntity {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getPhone() {
-        return phone;
-    }
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
-    public String getOccupation() {
+    public Occupation getOccupation() {
         return occupation;
     }
-    public void setOccupation(String occupation) {
+    public void setOccupation(Occupation occupation) {
         this.occupation = occupation;
+    }
+    public double getSalary() {
+        return salary;
+    }
+    public void setSalary(double salary) {
+        this.salary = salary;
     }
     public String getRole() {
         return role;
     }
     public void setRole(String role) {
         this.role = role;
-    }
-    public boolean isImportant() {
-        return important;
-    }
-    public void setImportant(boolean important) {
-        this.important = important;
     }
 
 }

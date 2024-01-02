@@ -9,17 +9,18 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.xion.interview.data.Occupation;
+import com.xion.interview.data.SamplePerson;
+import com.xion.interview.services.SamplePersonService;
 import com.xion.interview.views.MainLayout;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -33,15 +34,19 @@ import org.apache.commons.lang3.StringUtils;
 @Route(value = "data-grid", layout = MainLayout.class)
 public class PersonGridView extends Div {
 
-    private GridPro<Client> grid;
-    private GridListDataView<Client> gridListDataView;
+    private GridPro<SamplePerson> grid;
+    private GridListDataView<SamplePerson> gridListDataView;
 
-    private Grid.Column<Client> clientColumn;
-    private Grid.Column<Client> amountColumn;
-    private Grid.Column<Client> statusColumn;
-    private Grid.Column<Client> dateColumn;
+    private Grid.Column<SamplePerson> clientColumn;
+    private Grid.Column<SamplePerson> emailColumn;
+    private Grid.Column<SamplePerson> amountColumn;
+    private Grid.Column<SamplePerson> statusColumn;
+    private Grid.Column<SamplePerson> dateColumn;
 
-    public PersonGridView() {
+    private SamplePersonService samplePersonService;
+
+    public PersonGridView(SamplePersonService samplePersonService) {
+        this.samplePersonService = samplePersonService;
         addClassName("person-grid-view");
         setSizeFull();
         createGrid();
@@ -60,53 +65,59 @@ public class PersonGridView extends Div {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_COLUMN_BORDERS);
         grid.setHeight("100%");
 
-        List<Client> clients = getClients();
-        gridListDataView = grid.setItems(clients);
-    }
+        List<SamplePerson> samplePersonList = samplePersonService.findAll();
+        gridListDataView = grid.setItems(samplePersonList);
 
+    }
     private void addColumnsToGrid() {
         createClientColumn();
-        createAmountColumn();
-        createStatusColumn();
+        createEmailColumn();
+        createSalaryColumn();
+        createOccupationColumn();
         createDateColumn();
     }
 
     private void createClientColumn() {
-        clientColumn = grid.addColumn(new ComponentRenderer<>(client -> {
-            HorizontalLayout hl = new HorizontalLayout();
-            hl.setAlignItems(Alignment.CENTER);
-            Image img = new Image(client.getImg(), "");
+        clientColumn = grid.addColumn(new ComponentRenderer<>(samplePerson -> {
             Span span = new Span();
             span.setClassName("name");
-            span.setText(client.getClient());
-            hl.add(img, span);
-            return hl;
-        })).setComparator(client -> client.getClient()).setHeader("Client");
-    }
-
-    private void createAmountColumn() {
-        amountColumn = grid
-                .addEditColumn(Client::getAmount,
-                        new NumberRenderer<>(client -> client.getAmount(), NumberFormat.getCurrencyInstance(Locale.US)))
-                .text((item, newValue) -> item.setAmount(Double.parseDouble(newValue)))
-                .setComparator(client -> client.getAmount()).setHeader("Amount");
-    }
-
-    private void createStatusColumn() {
-        statusColumn = grid.addEditColumn(Client::getClient, new ComponentRenderer<>(client -> {
-            Span span = new Span();
-            span.setText(client.getStatus());
-            span.getElement().setAttribute("theme", "badge " + client.getStatus().toLowerCase());
+            span.setText(samplePerson.getLastName() + ", " + samplePerson.getLastName());
             return span;
-        })).select((item, newValue) -> item.setStatus(newValue), Arrays.asList("Pending", "Success", "Error"))
-                .setComparator(client -> client.getStatus()).setHeader("Status");
+        })).setComparator(samplePerson ->
+                samplePerson.getLastName() + ", " + samplePerson.getLastName()
+        ).setHeader("Client");
+    }
+
+    private void createEmailColumn() {
+        emailColumn = grid
+                .addEditColumn(SamplePerson::getEmail)
+                .text((item, newValue) -> item.setSalary(Double.parseDouble(newValue)))
+                .setComparator(client -> client.getSalary()).setHeader("Amount");
+    }
+
+    private void createSalaryColumn() {
+        amountColumn = grid
+                .addEditColumn(SamplePerson::getSalary,
+                        new NumberRenderer<>(samplePerson -> samplePerson.getSalary(), NumberFormat.getCurrencyInstance(Locale.US)))
+                .text((item, newValue) -> item.setSalary(Double.parseDouble(newValue)))
+                .setComparator(client -> client.getSalary()).setHeader("Amount");
+    }
+
+    private void createOccupationColumn() {
+        statusColumn = grid.addEditColumn(SamplePerson::getOccupation, new ComponentRenderer<>(samplePerson -> {
+            Span span = new Span();
+            span.setText(samplePerson.getOccupation().name());
+            span.getElement().setAttribute("theme", "badge " + samplePerson.getOccupation().name().toLowerCase());
+            return span;
+        })).select((item, newValue) -> item.setOccupation(Occupation.valueOf(newValue)), Occupation.names())
+                .setComparator(client -> client.getOccupation().name()).setHeader("Occupation");
     }
 
     private void createDateColumn() {
         dateColumn = grid
-                .addColumn(new LocalDateRenderer<>(client -> LocalDate.parse(client.getDate()),
+                .addColumn(new LocalDateRenderer<>(samplePerson -> samplePerson.getDateOfBirth(),
                         () -> DateTimeFormatter.ofPattern("M/d/yyyy")))
-                .setComparator(client -> client.getDate()).setHeader("Date").setWidth("180px").setFlexGrow(0);
+                .setComparator(client -> client.getDateOfBirth()).setHeader("Date of Birth").setWidth("180px").setFlexGrow(0);
     }
 
     private void addFiltersToGrid() {
@@ -118,8 +129,17 @@ public class PersonGridView extends Div {
         clientFilter.setWidth("100%");
         clientFilter.setValueChangeMode(ValueChangeMode.EAGER);
         clientFilter.addValueChangeListener(event -> gridListDataView
-                .addFilter(client -> StringUtils.containsIgnoreCase(client.getClient(), clientFilter.getValue())));
+                .addFilter(client -> StringUtils.containsIgnoreCase(client.getLastName() + ", " + client.getFirstName(), clientFilter.getValue())));
         filterRow.getCell(clientColumn).setComponent(clientFilter);
+
+        TextField emailFilter = new TextField();
+        emailFilter.setPlaceholder("Filter");
+        emailFilter.setClearButtonVisible(true);
+        emailFilter.setWidth("100%");
+        emailFilter.setValueChangeMode(ValueChangeMode.EAGER);
+        emailFilter.addValueChangeListener(event -> gridListDataView
+                .addFilter(client -> StringUtils.containsIgnoreCase(client.getLastName() + ", " + client.getFirstName(), emailFilter.getValue())));
+        filterRow.getCell(emailColumn).setComponent(emailFilter);
 
         TextField amountFilter = new TextField();
         amountFilter.setPlaceholder("Filter");
@@ -127,11 +147,11 @@ public class PersonGridView extends Div {
         amountFilter.setWidth("100%");
         amountFilter.setValueChangeMode(ValueChangeMode.EAGER);
         amountFilter.addValueChangeListener(event -> gridListDataView.addFilter(client -> StringUtils
-                .containsIgnoreCase(Double.toString(client.getAmount()), amountFilter.getValue())));
+                .containsIgnoreCase(Double.toString(client.getSalary()), amountFilter.getValue())));
         filterRow.getCell(amountColumn).setComponent(amountFilter);
 
         ComboBox<String> statusFilter = new ComboBox<>();
-        statusFilter.setItems(Arrays.asList("Pending", "Success", "Error"));
+        statusFilter.setItems(Occupation.names());
         statusFilter.setPlaceholder("Filter");
         statusFilter.setClearButtonVisible(true);
         statusFilter.setWidth("100%");
@@ -148,54 +168,20 @@ public class PersonGridView extends Div {
         filterRow.getCell(dateColumn).setComponent(dateFilter);
     }
 
-    private boolean areStatusesEqual(Client client, ComboBox<String> statusFilter) {
+    private boolean areStatusesEqual(SamplePerson samplePerson, ComboBox<String> statusFilter) {
         String statusFilterValue = statusFilter.getValue();
         if (statusFilterValue != null) {
-            return StringUtils.equals(client.getStatus(), statusFilterValue);
+            return StringUtils.equals(samplePerson.getOccupation().name(), statusFilterValue);
         }
         return true;
     }
 
-    private boolean areDatesEqual(Client client, DatePicker dateFilter) {
+    private boolean areDatesEqual(SamplePerson samplePerson, DatePicker dateFilter) {
         LocalDate dateFilterValue = dateFilter.getValue();
         if (dateFilterValue != null) {
-            LocalDate clientDate = LocalDate.parse(client.getDate());
+            LocalDate clientDate = samplePerson.getDateOfBirth();
             return dateFilterValue.equals(clientDate);
         }
         return true;
-    }
-
-    private List<Client> getClients() {
-        return Arrays.asList(
-                createClient(4957, "https://randomuser.me/api/portraits/women/42.jpg", "Amarachi Nkechi", 47427.0,
-                        "Success", "2019-05-09"),
-                createClient(675, "https://randomuser.me/api/portraits/women/24.jpg", "Bonelwa Ngqawana", 70503.0,
-                        "Success", "2019-05-09"),
-                createClient(6816, "https://randomuser.me/api/portraits/men/42.jpg", "Debashis Bhuiyan", 58931.0,
-                        "Success", "2019-05-07"),
-                createClient(5144, "https://randomuser.me/api/portraits/women/76.jpg", "Jacqueline Asong", 25053.0,
-                        "Pending", "2019-04-25"),
-                createClient(9800, "https://randomuser.me/api/portraits/men/24.jpg", "Kobus van de Vegte", 7319.0,
-                        "Pending", "2019-04-22"),
-                createClient(3599, "https://randomuser.me/api/portraits/women/94.jpg", "Mattie Blooman", 18441.0,
-                        "Error", "2019-04-17"),
-                createClient(3989, "https://randomuser.me/api/portraits/men/76.jpg", "Oea Romana", 33376.0, "Pending",
-                        "2019-04-17"),
-                createClient(1077, "https://randomuser.me/api/portraits/men/94.jpg", "Stephanus Huggins", 75774.0,
-                        "Success", "2019-02-26"),
-                createClient(8942, "https://randomuser.me/api/portraits/men/16.jpg", "Torsten Paulsson", 82531.0,
-                        "Pending", "2019-02-21"));
-    }
-
-    private Client createClient(int id, String img, String client, double amount, String status, String date) {
-        Client c = new Client();
-        c.setId(id);
-        c.setImg(img);
-        c.setClient(client);
-        c.setAmount(amount);
-        c.setStatus(status);
-        c.setDate(date);
-
-        return c;
     }
 };

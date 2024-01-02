@@ -2,6 +2,8 @@ package com.xion.interview.services;
 
 import com.xion.interview.data.SamplePerson;
 import com.xion.interview.data.SamplePersonRepository;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +41,10 @@ public class SamplePersonService {
 
     public int count() {
         return (int) repository.count();
+    }
+
+    public List<SamplePerson> findAll(){
+        return repository.findAll();
     }
 
 }
