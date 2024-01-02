@@ -1,5 +1,6 @@
 package com.xion.interview.views.addpersonform;
 
+import java.util.Random;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -33,6 +34,11 @@ public class AddPersonFormView extends Composite<VerticalLayout> {
 
     public AddPersonFormView(SamplePersonService samplePersonService) {
 
+        Random random1 = new Random();
+        if (random1.nextInt(100) < 15) {
+            throw new RuntimeException("Bad Request");
+        }
+
         VerticalLayout layoutColumn2 = new VerticalLayout();
         H3 h3 = new H3();
         FormLayout formLayout2Col = new FormLayout();
@@ -40,25 +46,30 @@ public class AddPersonFormView extends Composite<VerticalLayout> {
         TextField textField2 = new TextField();
         DatePicker datePicker = new DatePicker();
         TextField textField3 = new TextField();
-        EmailField emailField = new EmailField();
+        TextField emailField = new TextField();
         Select<Occupation> select = new Select<>();
         HorizontalLayout layoutRow = new HorizontalLayout();
         Button buttonPrimary = new Button();
         buttonPrimary.addClickListener(click -> {
-            SamplePerson samplePerson = new SamplePerson();
-            samplePerson.setFirstName(textField.getValue());
-            samplePerson.setLastName(textField2.getValue());
-            samplePerson.setDateOfBirth(datePicker.getValue());
-            samplePerson.setEmail(emailField.getValue());
-            samplePerson.setOccupation(select.getValue());
+            Random random = new Random();
+            boolean shouldWork = random.nextBoolean();
 
-            samplePersonService.update(samplePerson);
-            textField.clear();
-            textField2.clear();
-            datePicker.clear();
-            textField3.clear();
-            emailField.clear();
-            select.clear();
+            if (shouldWork) {
+                SamplePerson samplePerson = new SamplePerson();
+                samplePerson.setFirstName(textField.getValue());
+                samplePerson.setLastName(textField2.getValue());
+                samplePerson.setDateOfBirth(datePicker.getValue());
+                samplePerson.setEmail(emailField.getValue());
+                samplePerson.setOccupation(select.getValue());
+
+                samplePersonService.update(samplePerson);
+                textField.clear();
+                textField2.clear();
+                datePicker.clear();
+                textField3.clear();
+                emailField.clear();
+                select.clear();
+            }
 
         });
         Button buttonSecondary = new Button();
@@ -66,8 +77,8 @@ public class AddPersonFormView extends Composite<VerticalLayout> {
             textField.clear();
             textField2.clear();
             datePicker.clear();
-            textField3.clear();
-            emailField.clear();
+            //textField3.clear();
+            //emailField.clear();
             select.clear();
         });
 
@@ -78,7 +89,7 @@ public class AddPersonFormView extends Composite<VerticalLayout> {
         layoutColumn2.setWidth("100%");
         layoutColumn2.setMaxWidth("800px");
         layoutColumn2.setHeight("min-content");
-        h3.setText("Personal Information");
+        h3.setText("Personal Infonation");
         h3.setWidth("100%");
         formLayout2Col.setWidth("100%");
         textField.setLabel("First Name");
@@ -86,7 +97,7 @@ public class AddPersonFormView extends Composite<VerticalLayout> {
         datePicker.setLabel("Birthday");
         textField3.setLabel("Phone Number");
         emailField.setLabel("Email");
-        select.setLabel("Occupation");
+        select.setLabel("Occupatoin");
         select.setItems(Occupation.values());
         select.setItemLabelGenerator(o -> o.name());
         layoutRow.addClassName(Gap.MEDIUM);

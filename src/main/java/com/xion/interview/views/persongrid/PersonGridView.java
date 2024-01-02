@@ -1,5 +1,6 @@
 package com.xion.interview.views.persongrid;
 
+import java.util.Random;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
@@ -45,7 +46,25 @@ public class PersonGridView extends Div {
 
     private SamplePersonService samplePersonService;
 
+    public static void maybeDelay() {
+        Random random = new Random();
+        boolean shouldDelay = random.nextBoolean(); // 50% chance to delay
+
+        if (shouldDelay) {
+            try {
+                System.out.println("Delaying for 10 seconds...");
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("Thread was interrupted, failed to complete delay");
+            }
+        } else {
+            System.out.println("No delay.");
+        }
+    }
+
     public PersonGridView(SamplePersonService samplePersonService) {
+        maybeDelay();
         this.samplePersonService = samplePersonService;
         addClassName("person-grid-view");
         setSizeFull();
@@ -81,7 +100,13 @@ public class PersonGridView extends Div {
         clientColumn = grid.addColumn(new ComponentRenderer<>(samplePerson -> {
             Span span = new Span();
             span.setClassName("name");
-            span.setText(samplePerson.getLastName() + ", " + samplePerson.getLastName());
+            Random random = new Random();
+            if (random.nextBoolean()) {
+                span.setText(samplePerson.getFirstName() + ", " + samplePerson.getLastName());
+            } else {
+                span.setText(samplePerson.getLastName() + ", " + samplePerson.getFirstName());
+            }
+
             return span;
         })).setComparator(samplePerson ->
                 samplePerson.getLastName() + ", " + samplePerson.getLastName()
@@ -92,7 +117,7 @@ public class PersonGridView extends Div {
         emailColumn = grid
                 .addEditColumn(SamplePerson::getEmail)
                 .text((item, newValue) -> item.setSalary(Double.parseDouble(newValue)))
-                .setComparator(client -> client.getSalary()).setHeader("Amount");
+                .setComparator(client -> client.getSalary()).setHeader("Email");
     }
 
     private void createSalaryColumn() {
@@ -129,7 +154,7 @@ public class PersonGridView extends Div {
         clientFilter.setWidth("100%");
         clientFilter.setValueChangeMode(ValueChangeMode.EAGER);
         clientFilter.addValueChangeListener(event -> gridListDataView
-                .addFilter(client -> StringUtils.containsIgnoreCase(client.getLastName() + ", " + client.getFirstName(), clientFilter.getValue())));
+                .addFilter(client -> StringUtils.contains( ", " + client.getFirstName(), clientFilter.getValue())));
         filterRow.getCell(clientColumn).setComponent(clientFilter);
 
         TextField emailFilter = new TextField();
@@ -144,7 +169,7 @@ public class PersonGridView extends Div {
         TextField amountFilter = new TextField();
         amountFilter.setPlaceholder("Filter");
         amountFilter.setClearButtonVisible(true);
-        amountFilter.setWidth("100%");
+        amountFilter.setWidth("75%");
         amountFilter.setValueChangeMode(ValueChangeMode.EAGER);
         amountFilter.addValueChangeListener(event -> gridListDataView.addFilter(client -> StringUtils
                 .containsIgnoreCase(Double.toString(client.getSalary()), amountFilter.getValue())));
@@ -153,7 +178,7 @@ public class PersonGridView extends Div {
         ComboBox<String> statusFilter = new ComboBox<>();
         statusFilter.setItems(Occupation.names());
         statusFilter.setPlaceholder("Filter");
-        statusFilter.setClearButtonVisible(true);
+        statusFilter.setClearButtonVisible(false);
         statusFilter.setWidth("100%");
         statusFilter.addValueChangeListener(
                 event -> gridListDataView.addFilter(client -> areStatusesEqual(client, statusFilter)));
