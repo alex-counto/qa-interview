@@ -9,7 +9,7 @@ public class SamplePerson extends AbstractEntity {
 
     private String firstName;
     private String lastName;
-    @Email
+
     private String email;
     private LocalDate dateOfBirth;
     private Occupation occupation;
