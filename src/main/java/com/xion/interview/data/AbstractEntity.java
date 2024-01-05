@@ -1,11 +1,12 @@
 package com.xion.interview.data;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Version;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Version;
 
 @MappedSuperclass
 public abstract class AbstractEntity {
@@ -39,14 +40,14 @@ public abstract class AbstractEntity {
         return super.hashCode();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof AbstractEntity that)) {
-            return false; // null or not an AbstractEntity class
-        }
-        if (getId() != null) {
-            return getId().equals(that.getId());
-        }
-        return super.equals(that);
-    }
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (!(obj instanceof AbstractEntity)) {
+//            return false; // null or not an AbstractEntity class
+//        }
+//        if (getId() != null) {
+//            return getId().equals(that.getId());
+//        }
+//        return super.equals(that);
+//    }
 }

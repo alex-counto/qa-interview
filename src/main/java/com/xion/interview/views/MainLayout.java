@@ -7,13 +7,13 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.xion.interview.views.addpersonform.AddPersonFormView;
 import com.xion.interview.views.persongrid.PersonGridView;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -30,7 +30,7 @@ public class MainLayout extends AppLayout {
 
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
-        toggle.setAriaLabel("Menu toggle");
+//        toggle.setAriaLabel("Menu toggle");
 
         viewTitle = new H2();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
@@ -48,13 +48,15 @@ public class MainLayout extends AppLayout {
         addToDrawer(header, scroller, createFooter());
     }
 
-    private SideNav createNavigation() {
-        SideNav nav = new SideNav();
+    private Tabs createNavigation() {
+        Tabs tabs = new Tabs();
 
-        nav.addItem(new SideNavItem("Add Person Form", AddPersonFormView.class, LineAwesomeIcon.USER.create()));
-        nav.addItem(new SideNavItem("Person Grid", PersonGridView.class, LineAwesomeIcon.TH_SOLID.create()));
+        Tab addPersonTab = new Tab(new RouterLink("Add Person Form", AddPersonFormView.class));
+        Tab personGridTab = new Tab(new RouterLink("Person Grid", PersonGridView.class));
 
-        return nav;
+        tabs.add(addPersonTab, personGridTab);
+
+        return tabs;
     }
 
     private Footer createFooter() {

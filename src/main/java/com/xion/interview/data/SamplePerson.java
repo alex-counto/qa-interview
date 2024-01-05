@@ -1,7 +1,6 @@
 package com.xion.interview.data;
 
-import jakarta.persistence.Entity;
-import jakarta.validation.constraints.Email;
+import javax.persistence.Entity;
 import java.time.LocalDate;
 
 @Entity
